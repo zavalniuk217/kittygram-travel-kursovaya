@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kittygram | Кото-путешествия</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --cat-primary: #FF6B6B;
+            --cat-secondary: #4ECDC4;
+            --cat-dark: #2C3E50;
+            --cat-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --cat-gradient-warm: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background: var(--cat-gradient-warm) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .hero {
+            background: var(--cat-gradient);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            border-radius: 0 0 40px 40px;
+            margin-bottom: 40px;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--cat-primary);
+        }
+        .card {
+            border: none;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        .card-header {
+            background: var(--cat-gradient-warm);
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+        }
+        .card-title {
+            color: var(--cat-dark);
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+        .route-city {
+            font-size: 1.1rem;
+            color: var(--cat-primary);
+            font-weight: bold;
+        }
+        .btn-outline-cat {
+            border: 2px solid var(--cat-primary);
+            color: var(--cat-primary);
+            border-radius: 25px;
+            padding: 8px 20px;
+            background: white;
+            transition: all 0.3s;
+        }
+        .btn-outline-cat:hover {
+            background: var(--cat-primary);
+            color: white;
+        }
+        .btn-primary {
+            background: var(--cat-gradient);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+        }
+        .form-container {
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        .form-control {
+            border-radius: 15px;
+            border: 2px solid #e0e0e0;
+            padding: 12px 15px;
+        }
+        .form-control:focus {
+            border-color: var(--cat-primary);
+            box-shadow: 0 0 0 3px rgba(255,107,107,0.2);
+        }
+        .footer {
+            background: var(--cat-gradient);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: 50px;
+            border-radius: 40px 40px 0 0;
+        }
+        .toast-notify {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 15px 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+            border-left: 5px solid #4ECDC4;
+        }
+        .toast-notify.error {
+            border-left-color: #FF6B6B;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card, .form-container {
+            animation: fadeInUp 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">🐱 Kittygram | Кото-путешествия</a>
+            <div class="ms-auto">
+                {% if user.is_authenticated %}
+                    <span class="text-white me-3">🐱 {{ user.username }}</span>
+                    <a href="/admin/logout/" class="btn btn-outline-light">🚪 Выйти</a>
+                {% else %}
+                    <a href="/admin/login/?next=/home/" class="btn btn-outline-light">🔑 Войти</a>
+                {% endif %}
+                <a href="/cats/" class="btn btn-light ms-2">🐱 Мои котики</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="container">
+            <div class="emoji">🐱 🗺️ 🐾</div>
+            <h1>Путешествуй с котиком!</h1>
+            <p class="lead">Планируй маршруты, находи попутчиков и исследуй мир вместе со своим питомцем</p>
+            {% if user.is_authenticated %}
+                <a href="#create-route" class="btn btn-light btn-lg mt-3">✈️ Создать маршрут</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-md-3">
+                <div class="stat-number">150+</div>
+                <p>Активных маршрутов</p>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">45+</div>
+                <p>Городов</p>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">300+</div>
+                <p>Довольных котиков</p>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-number">1000+</div>
+                <p>Километров</p>
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div id="create-route" class="form-container">
+            <h3>🐾 Создать новый маршрут путешествия</h3>
+            <form id="createRouteForm">
+                <div class="mb-3">
+                    <label class="form-label">🐱 Название маршрута</label>
+                    <input type="text" id="routeTitle" class="form-control" placeholder="Например: Тур по Золотому кольцу" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label">🏁 Город отправления</label>
+                        <input type="text" id="startCity" class="form-control" placeholder="Москва" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">🏁 Город прибытия</label>
+                        <input type="text" id="endCity" class="form-control" placeholder="Санкт-Петербург" required>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <label class="form-label">📅 Дата начала</label>
+                        <input type="date" id="startDate" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">📅 Дата окончания</label>
+                        <input type="date" id="endDate" class="form-control" required>
+                    </div>
+                </div>
+                <div class="mb-3 mt-3">
+                    <label class="form-label">🐱 Ваши котики (ID через запятую)</label>
+                    <input type="text" id="catsIds" class="form-control" placeholder="Например: 1, 2">
+                </div>
+                <button type="button" onclick="createRoute()" class="btn btn-primary w-100">✈️ Создать маршрут</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            🔑 <a href="/admin/login/?next=/home/">Войдите в систему</a>, чтобы создавать маршруты и бронировать путешествия!
+        </div>
+        {% endif %}
+
+        <h2 class="mt-5 mb-4">🗺️ Популярные маршруты</h2>
+        <div class="row" id="routes-list">
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/api/travel/routes/" class="btn btn-primary btn-lg">Показать все маршруты →</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>🐱 Kittygram — социальная сеть для любителей котиков | Кото-путешествия</p>
+        <p>📍 Планируй путешествия с питомцами и находи попутчиков по всему миру</p>
+        <p>🐾 Путешествуйте безопасно вместе с вашими любимцами! 🐾</p>
+    </div>
+
+    <div id="toast" class="toast-notify">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showMessage(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.style.display = 'block';
+            toast.className = 'toast-notify' + (isError ? ' error' : '');
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function joinRoute(routeId) {
+            try {
+                const response = await fetch(`/api/travel/routes/${routeId}/join/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({})
+                });
+                
+                if (response.status === 201) {
+                    showMessage('✅ Вы успешно присоединились к путешествию!');
+                    loadRoutes();
+                } else if (response.status === 403) {
+                    const error = await response.json();
+                    showMessage(`❌ ${error.detail || 'Нельзя присоединиться к своему путешествию!'}`, true);
+                } else if (response.status === 400) {
+                    const error = await response.json();
+                    showMessage(`❌ ${error.detail || 'Вы уже присоединились'}`, true);
+                } else if (response.status === 401) {
+                    showMessage('❌ Пожалуйста, войдите в систему!', true);
+                    window.location.href = '/admin/login/?next=/home/';
+                } else {
+                    const error = await response.json();
+                    showMessage(`❌ Ошибка: ${error.detail || 'Неизвестная ошибка'}`, true);
+                }
+            } catch (error) {
+                showMessage('❌ Ошибка соединения с сервером', true);
+            }
+        }
+
+        async function createRoute() {
+            const title = document.getElementById('routeTitle').value;
+            const startCity = document.getElementById('startCity').value;
+            const endCity = document.getElementById('endCity').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const catsStr = document.getElementById('catsIds').value;
+            const cats = catsStr ? catsStr.split(',').map(c => parseInt(c.trim())) : [];
+            
+            try {
+                const response = await fetch('/api/travel/routes/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        title, start_city: startCity, end_city: endCity,
+                        start_date: startDate, end_date: endDate, cats
+                    })
+                });
+                
+                if (response.status === 201) {
+                    showMessage('✅ Маршрут создан!');
+                    document.getElementById('routeTitle').value = '';
+                    document.getElementById('startCity').value = '';
+                    document.getElementById('endCity').value = '';
+                    document.getElementById('startDate').value = '';
+                    document.getElementById('endDate').value = '';
+                    document.getElementById('catsIds').value = '';
+                    loadRoutes();
+                } else {
+                    const error = await response.json();
+                    showMessage(`❌ Ошибка: ${Object.values(error).join(', ')}`, true);
+                }
+            } catch (error) {
+                showMessage('❌ Ошибка соединения с сервером', true);
+            }
+        }
+
+        async function loadRoutes() {
+            try {
+                const response = await fetch('/api/travel/routes/');
+                if (response.ok) {
+                    const data = await response.json();
+                    const routes = data.results || data;
+                    const container = document.getElementById('routes-list');
+                    
+                    if (!routes || routes.length === 0) {
+                        container.innerHTML = '<div class="col-12 text-center"><p>Пока нет маршрутов. Создайте первый!</p></div>';
+                        return;
+                    }
+                    
+                    container.innerHTML = routes.map(route => `
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">🗺️ Маршрут</div>
+                                <div class="route-info p-3">
+                                    <h4 class="card-title">${escapeHtml(route.title)}</h4>
+                                    <p class="route-city">${escapeHtml(route.start_city)} → ${escapeHtml(route.end_city)}</p>
+                                    <p class="text-muted">📅 ${route.start_date} - ${route.end_date}</p>
+                                    <p>👤 Автор: ${escapeHtml(route.author_username || route.author)}</p>
+                                    <p class="text-muted">🚗 Участников: ${route.bookings_count || 0}</p>
+                                    <button onclick="joinRoute(${route.id})" class="btn btn-outline-cat w-100">🐾 Присоединиться</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadRoutes);
+    </script>
+</body>
+</html>

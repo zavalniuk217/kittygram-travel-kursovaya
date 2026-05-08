@@ -1,0 +1,61 @@
+{% extends "rest_framework/base.html" %}
+{% load static %}
+
+{% block style %}
+{{ block.super }}
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .navbar {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+        border: none !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .navbar-brand {
+        color: white !important;
+        font-weight: bold;
+        font-size: 1.5rem;
+    }
+    .navbar-brand small {
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.9);
+    }
+    .nav.navbar-nav li a {
+        color: white !important;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        border: none !important;
+    }
+    .panel-default > .panel-heading {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+        color: white !important;
+    }
+    h1, h2, h3 {
+        color: #764ba2 !important;
+    }
+    .footer {
+        text-align: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin-top: 30px;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+    <a class="navbar-brand" href="/">
+        🐱 Kittygram API
+        <small>Кото-путешествия</small>
+    </a>
+{% endblock %}
+
+{% block footer %}
+    <div class="footer">
+        <p>🐱 Kittygram — социальная сеть для любителей котиков | Кото-путешествия</p>
+    </div>
+{% endblock %}
