@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'kittygram.wsgi.application'
 if os.getenv('DB_ENGINE') == 'django.db.backends.postgresql':
     DATABASES = {
         'default': {
-            'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+            'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.getenv('DB_NAME', 'kittygram_db'),
             'USER': os.getenv('DB_USER', 'kittygram_user'),
             'PASSWORD': os.getenv('DB_PASSWORD', 'kittygram_pass'),

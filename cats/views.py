@@ -5,8 +5,8 @@ from rest_framework import status, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import models
 
-from .models import Achievement, Cat, User, TravelRoute, TravelBooking
-from .serializers import AchievementSerializer, CatSerializer, UserSerializer, TravelRouteSerializer, TravelBookingSerializer
+from .models import Achievement, Cat, User, TravelRoute, TravelBooking, TravelPoint
+from .serializers import AchievementSerializer, CatSerializer, UserSerializer, TravelRouteSerializer, TravelBookingSerializer, TravelPointSerializer
 from .permissions import IsOwnerOrReadOnly
 
 class CatViewSet(viewsets.ModelViewSet):
@@ -29,6 +29,10 @@ class TravelRouteViewSet(viewsets.ModelViewSet):
     queryset = TravelRoute.objects.all()
     serializer_class = TravelRouteSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_fields = ['start_city', 'end_city', 'start_date', 'end_date']
+    ordering_fields = ['start_date', 'created_at']
+    ordering = ['-created_at']
     
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -90,6 +94,24 @@ class TravelRouteViewSet(viewsets.ModelViewSet):
         
         serializer = TravelRouteSerializer(matching_routes, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'], url_path='points', permission_classes=[permissions.IsAuthenticated])
+    def add_point(self, request, pk=None):
+        """Добавить промежуточную точку маршрута"""
+        route = self.get_object()
+        
+        # Проверка: только владелец или администратор может добавлять точки
+        if request.user != route.author and not request.user.is_staff:
+            return Response(
+                {'detail': 'Только владелец маршрута может добавлять точки'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = TravelPointSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(route=route)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def index(request):

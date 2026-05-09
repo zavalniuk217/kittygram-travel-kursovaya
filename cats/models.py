@@ -60,6 +60,7 @@ class TravelRoute(models.Model):
         ordering = ['-created_at']
         verbose_name = "Маршрут путешествия"
         verbose_name_plural = "Маршруты путешествий"
+        unique_together = ('author', 'title')  # Уникальность названия для одного автора
     
     def __str__(self):
         return self.title
