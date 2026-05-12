@@ -60,7 +60,7 @@ class TravelRoute(models.Model):
         ordering = ['-created_at']
         verbose_name = "Маршрут путешествия"
         verbose_name_plural = "Маршруты путешествий"
-        unique_together = ('author', 'title')  # Уникальность названия для одного автора
+        unique_together = ('author', 'title')
     
     def __str__(self):
         return self.title
@@ -119,3 +119,34 @@ class TravelBooking(models.Model):
     
     def __str__(self):
         return f"{self.participant.username} -> {self.route.title}"
+
+
+class WishlistItem(models.Model):
+    """Потребность кота (Wishlist)"""
+    cat = models.ForeignKey(
+        Cat, 
+        on_delete=models.CASCADE, 
+        related_name='wishlist_items',
+        verbose_name="Котик"
+    )
+    title = models.CharField(max_length=100, verbose_name="Название потребности")
+    description = models.TextField(blank=True, verbose_name="Описание")
+    is_completed = models.BooleanField(default=False, verbose_name="Выполнено/куплено")
+    travel_route = models.ForeignKey(
+        TravelRoute, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='wishlist_items',
+        verbose_name="Связанный маршрут"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Потребность кота (Wishlist)"
+        verbose_name_plural = "Потребности котов (Wishlist)"
+
+    def __str__(self):
+        return f"{self.cat.name}: {self.title}"

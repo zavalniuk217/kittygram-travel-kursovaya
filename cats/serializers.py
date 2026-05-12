@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from .models import TravelRoute, TravelPoint, TravelBooking
+from .models import TravelRoute, TravelPoint, TravelBooking, WishlistItem
 
 import datetime as dt
 
@@ -31,8 +31,7 @@ class CatSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Cat
-        fields = ('id', 'name', 'color', 'birth_year', 'achievements', 'owner',
-                  'age')
+        fields = ('id', 'name', 'color', 'birth_year', 'achievements', 'owner', 'age')
 
     def get_age(self, obj):
         return dt.datetime.now().year - obj.birth_year
@@ -50,6 +49,7 @@ class CatSerializer(serializers.ModelSerializer):
                 AchievementCat.objects.create(
                     achievement=current_achievement, cat=cat)
             return cat
+
 
 class TravelPointSerializer(serializers.ModelSerializer):
     class Meta:
@@ -85,3 +85,19 @@ class TravelRouteSerializer(serializers.ModelSerializer):
                 'end_date': 'Дата окончания не может быть раньше даты начала'
             })
         return data
+
+
+class WishlistItemSerializer(serializers.ModelSerializer):
+    cat_name = serializers.ReadOnlyField(source='cat.name')
+    route_title = serializers.ReadOnlyField(source='travel_route.title')
+
+    class Meta:
+        model = WishlistItem
+        fields = '__all__'
+        read_only_fields = ('created_at', 'updated_at')
+
+    def validate_cat(self, value):
+        request = self.context.get('request')
+        if request and value.owner != request.user:
+            raise serializers.ValidationError("Вы можете добавлять потребности только для своих котиков")
+        return value

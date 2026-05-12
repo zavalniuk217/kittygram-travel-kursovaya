@@ -5,8 +5,8 @@ from rest_framework import status, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import models
 
-from .models import Achievement, Cat, User, TravelRoute, TravelBooking, TravelPoint
-from .serializers import AchievementSerializer, CatSerializer, UserSerializer, TravelRouteSerializer, TravelBookingSerializer, TravelPointSerializer
+from .models import Achievement, Cat, User, TravelRoute, TravelBooking, TravelPoint, WishlistItem
+from .serializers import AchievementSerializer, CatSerializer, UserSerializer, TravelRouteSerializer, TravelBookingSerializer, TravelPointSerializer, WishlistItemSerializer
 from .permissions import IsOwnerOrReadOnly
 
 class CatViewSet(viewsets.ModelViewSet):
@@ -112,6 +112,27 @@ class TravelRouteViewSet(viewsets.ModelViewSet):
             serializer.save(route=route)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class WishlistItemViewSet(viewsets.ModelViewSet):
+    """ViewSet для управления Wishlist (потребностями котиков)"""
+    serializer_class = WishlistItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return WishlistItem.objects.filter(cat__owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save()
+
+    @action(detail=True, methods=['post'])
+    def toggle_completed(self, request, pk=None):
+        """Переключить статус выполнения (выполнено/не выполнено)"""
+        item = self.get_object()
+        item.is_completed = not item.is_completed
+        item.save()
+        serializer = self.get_serializer(item)
+        return Response(serializer.data)
 
 
 def index(request):
